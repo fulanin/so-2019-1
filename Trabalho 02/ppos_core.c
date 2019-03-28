@@ -25,7 +25,7 @@ void print_elem (void *ptr) {
 }
 
 void ppos_init () {
-  // setvbuf (stdout, 0, _IONBF, 0);
+  setvbuf (stdout, 0, _IONBF, 0);
   main_task.id = id_create();
   getcontext (&main_task.context);
   
@@ -33,37 +33,6 @@ void ppos_init () {
   // queue_print("fila: ", (queue_t*)tcb, print_elem);
   current_task = &main_task;
 }
-
-// int id_create () {
-//   task_t *first = (task_t*)tcb;
-//   srand(time(NULL));
-//   int r = (rand() % STACKSIZE) + 1;
-
-//   // Empty tcb
-//   if (first == NULL)
-//     return r;
-
-//   // tcb contains one element
-//   if (first->next == first) {
-//     while (first->id == r)
-//       r = (rand() % STACKSIZE) + 1;
-//     return r;
-//   }
-
-//   for (task_t* node = first; node->next != first; node = node->next) {
-//     if (node->id == r) {
-//       r = (rand() % STACKSIZE) + 1;
-//       node = first;
-//     }
-//     if (node->next->next == first) {
-//       if (node->next->id == r) {
-//         r = (rand() % STACKSIZE) + 1;
-//         node = first;
-//       }
-//     }
-//   }
-//   return r;
-// }
 
 int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   task->id = id_create();
