@@ -7,9 +7,12 @@
 #define STACKSIZE 32768
 
 int current_id=0;
-task_t *tcb, *current_task;
-task_t main_task;
+int userTasks=0;
+task_t *tcb, *ready, *current_task;
+task_t main_task, dispatcher;
 
+// ----------
+// Tasks
 int id_create () {
   int result = current_id;
   current_id++;
@@ -25,45 +28,17 @@ void print_elem (void *ptr) {
 }
 
 void ppos_init () {
-  // setvbuf (stdout, 0, _IONBF, 0);
+  setvbuf (stdout, 0, _IONBF, 0);
   main_task.id = id_create();
   getcontext (&main_task.context);
   
   queue_append((queue_t**) &tcb, (queue_t*) &main_task);
   // queue_print("fila: ", (queue_t*)tcb, print_elem);
   current_task = &main_task;
+
+  task_create(&dispatcher, dispatcher_body, NULL);
+  queue_append((queue_t**) &tcb, (queue_t*) &dispatcher);
 }
-
-// int id_create () {
-//   task_t *first = (task_t*)tcb;
-//   srand(time(NULL));
-//   int r = (rand() % STACKSIZE) + 1;
-
-//   // Empty tcb
-//   if (first == NULL)
-//     return r;
-
-//   // tcb contains one element
-//   if (first->next == first) {
-//     while (first->id == r)
-//       r = (rand() % STACKSIZE) + 1;
-//     return r;
-//   }
-
-//   for (task_t* node = first; node->next != first; node = node->next) {
-//     if (node->id == r) {
-//       r = (rand() % STACKSIZE) + 1;
-//       node = first;
-//     }
-//     if (node->next->next == first) {
-//       if (node->next->id == r) {
-//         r = (rand() % STACKSIZE) + 1;
-//         node = first;
-//       }
-//     }
-//   }
-//   return r;
-// }
 
 int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   task->id = id_create();
@@ -83,6 +58,7 @@ int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   queue_append((queue_t**) &tcb, (queue_t*) task);
   makecontext(&task->context, (void*)(*start_routine), 1, arg) ;
   // queue_print("fila: ", (queue_t*)tcb, print_elem);
+  ++userTasks;
   return task->id;
 }
 
@@ -104,4 +80,35 @@ void task_exit (int exitCode) {
 
 int task_id () {
   return current_task->id;
+}
+
+// ----------
+// Scheduler
+task_t *scheduler () {
+  return queue_remove((queue_t**) &ready, (queue_t*) &ready);
+}
+
+// ----------
+// Dispatcher
+void dispatcher_body () {
+  while ( userTasks > 0 ) {
+    next = scheduler() ;  // scheduler é uma função
+    if (next) {
+      // ações antes de lançar a tarefa "next", se houverem
+      task_switch (next) ; // transfere controle para a tarefa "next"
+      // ações após retornar da tarefa "next", se houverem
+    }
+  }
+  task_exit(0) ; // encerra a tarefa dispatcher
+}
+
+// Devolve uma tarefa para o final da fila de prontas e 
+// devolve o processador para o dispatcher
+void task_yeld () {
+  task_t *old_task = current_task;
+  current_task = &dispatcher;
+
+  swapcontext(&old_task->context, &current_task->context);
+
+  // No final, devolve a execucao para o main
 }

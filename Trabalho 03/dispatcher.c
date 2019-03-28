@@ -6,6 +6,8 @@
 
 #define STACKSIZE 32768
 
+task_t *ready;
+
 void dispatcher_body () {
   while ( userTasks > 0 ) {
     next = scheduler() ;  // scheduler é uma função
@@ -22,4 +24,6 @@ void dispatcher_body () {
 // devolve o processador para o dispatcher
 void task_yeld () {
 
+
+  // No final, devolve a execucao para o main
 }
