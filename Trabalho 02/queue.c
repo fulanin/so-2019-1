@@ -1,4 +1,4 @@
-// gcc -o test -Wall -std=c99 queue.c testafila.c 
+// gcc -o test -Wall -std=gnu99 queue.c testafila.c 
 
 #include <stdio.h>
 #include <stdlib.h>
