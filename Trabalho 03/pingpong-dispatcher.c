@@ -31,6 +31,7 @@ int main (int argc, char *argv[])
 
    // Cria o dispatcher
    ppos_init () ;
+  //  puts("dei o init");
 
    // Cria as tasks, mas elas nao estao em execucao
    // Elas sao executadas apos chamar task_switch()
@@ -39,6 +40,7 @@ int main (int argc, char *argv[])
    task_create (&Ping, Body, "            Ping") ;
    task_create (&Pong, Body, "                Pong") ;
    task_create (&Pung, Body, "                    Pung") ;
+  //  puts("criei as tasks");
 
    // Executa o dispatcher
    task_yield () ;
