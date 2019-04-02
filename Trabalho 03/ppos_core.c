@@ -66,7 +66,7 @@ void task_yield () {
   // puts("vai pro main");
   // No final, devolve a execucao para o main
   if (userTasks == 0)
-    task_exit(0);
+    task_exit(1);
 }
 
 // ----------
