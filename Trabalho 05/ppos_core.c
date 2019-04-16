@@ -14,6 +14,14 @@ task_t main_task, dispatcher;
 
 // ----------
 // Helpers
+int limit (int x, int a, int b) {
+  if (x < a)
+    return a;
+  if (x > b)
+    return b;
+  return x;
+}
+
 void print_elem (void *ptr) {
    task_t *elem = ptr ;
 
@@ -30,8 +38,40 @@ int id_create () {
 
 // ----------
 // Scheduler
+void task_setprio (task_t *task, int prio) {
+  if (!task) {
+    current_task->static_prio = limit(prio, -20, 20);
+    // current_task->dynamic_prio = current_task->static_prio;
+    return;
+  }
+  task->static_prio = limit(prio, -20, 20);
+  // task->dynamic_prio = task->static_prio;
+  return;
+}
+
+int task_getprio (task_t *task) {
+  if (!task)
+    return current_task->static_prio;
+  return task->static_prio;
+}
+
 task_t *scheduler () {
-  return ready;
+  task_t *next = ready;
+
+  for (task_t *node = ready->next; node != ready; node = node->next) {
+    if (init == 0) 
+      node->dynamic_prio = node->static_prio;
+    // printf("Dynamic: %d // Static: %d\n", node->dynamic_prio, node->static_prio);
+    if (node->dynamic_prio < next->dynamic_prio) {
+      next->dynamic_prio--;
+      next = node;
+    } else {
+      node->dynamic_prio--;    
+    }
+  }
+  init = 1;
+  next->dynamic_prio = next->static_prio;
+  return next;
 }
 
 // ----------
@@ -50,9 +90,9 @@ void dispatcher_body () {
 // Devolve uma tarefa para o final da fila de prontas e 
 // devolve o processador para o dispatcher
 void task_yield () {
-  if (init != 0)
-    ready = ready->next;
-  init = 1;
+  // if (init != 0)
+  //   ready = ready->next;
+  // init = 1;
   task_switch(&dispatcher);
 
   // No final, devolve a execucao para o main
@@ -89,6 +129,8 @@ void ppos_init () {
 
 int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   task->id = id_create();
+  task_setprio(task, 0);
+  task->dynamic_prio = task->static_prio;
   getcontext (&task->context);
   char *stack = malloc (STACKSIZE) ;
   if (stack) {
