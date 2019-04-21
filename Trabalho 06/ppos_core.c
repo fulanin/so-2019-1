@@ -6,11 +6,13 @@
 #include "ppos.h"
 
 #define STACKSIZE 32768
-#define QUANTUM 10
+#define QUANTUM 20
 
 int current_id=0;
 int userTasks=0;
 int init=0;
+
+unsigned int global_time=0;
 
 task_t *tcb, *ready, *current_task;
 task_t main_task, dispatcher;
@@ -38,16 +40,22 @@ void print_elem (void *ptr) {
 
 int id_create () {
   int result = current_id;
+
   current_id++;
   return result;
 }
 
 void handler (int signum) {
+  ++global_time;
+  ++current_task->cpu_time;
   // printf ("Recebi o sinal %d\n", signum);
-  if (current_task->quantum-- <= 0) {
-    // puts("Next");
+  if (--current_task->quantum <= 0) {
     task_yield();
   }
+}
+
+unsigned int systime () {
+  return global_time;  
 }
 
 // ----------
@@ -92,10 +100,13 @@ task_t *scheduler () {
 // Dispatcher
 void dispatcher_body () {
   task_t *next;
+
   while ( userTasks > 0 ) {
     next = scheduler();
     if (next) {
       next->quantum = QUANTUM;
+      // ++next->activations;
+      queue_remove((queue_t**) &ready, (queue_t*) next);
       task_switch (next);
     }
   }
@@ -108,11 +119,13 @@ void task_yield () {
   // if (init != 0)
   //   ready = ready->next;
   // init = 1;
+  queue_append((queue_t**) &ready, (queue_t*) current_task);
+  // ++dispatcher.activations;
   task_switch(&dispatcher);
 
   // No final, devolve a execucao para o main
-  if (userTasks == 0)
-    task_exit(1);
+  // if (userTasks == 0)
+  //   task_exit(1);
 }
 
 // ----------
@@ -143,6 +156,7 @@ void ppos_init () {
   queue_append((queue_t**) &tcb, (queue_t*) &main_task);
 
   dispatcher.id = id_create();
+  dispatcher.activations = 0;
   getcontext(&dispatcher.context);
   char *stack = malloc (STACKSIZE) ;
   if (stack) {
@@ -165,6 +179,8 @@ int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   task->id = id_create();
   task_setprio(task, 0);
   task->dynamic_prio = task->static_prio;
+  task->start = global_time;
+  task->activations = 0;
   // task->quantum = QUANTUM;
   getcontext (&task->context);
   char *stack = malloc (STACKSIZE) ;
@@ -192,6 +208,7 @@ int task_switch (task_t *task) {
 
   task_t *old_task = current_task;
   current_task = task;
+  current_task->activations++;
   swapcontext(&old_task->context, &current_task->context);
   return 0;
 }
@@ -199,12 +216,17 @@ int task_switch (task_t *task) {
 void task_exit (int exitCode) {
   switch (exitCode) {
     case 0:
+      // queue_print("Ready list", (queue_t*)ready, &print_elem);
+      printf("Task %d exit: running time %u ms, cpu time %u ms, %u activations\n", 
+             current_task->id, global_time - current_task->start, current_task->cpu_time, current_task->activations);
       --userTasks;
-      queue_remove((queue_t**) &ready, (queue_t*) ready);
+      // queue_remove((queue_t**) &ready, (queue_t*) current_task);
       task_switch(&dispatcher);
       break;
 
     case 1:
+      printf("Task %d exit: running time %u ms, cpu time %u ms, %u activations\n", 
+             dispatcher.id, global_time - dispatcher.start, dispatcher.cpu_time, dispatcher.activations);
       task_switch(&main_task);
       break;
   }
