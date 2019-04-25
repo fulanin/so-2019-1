@@ -1,3 +1,7 @@
+// Codigo desenvolvido para a disciplina de Sistemas Operacionais por:
+// GRR20116644 - Guilherme Lopes do Nascimento
+// GRR20136059 - Matheus Rotondano de Camargo
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

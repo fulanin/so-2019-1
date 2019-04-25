@@ -1,6 +1,6 @@
-// PingPongOS - PingPong Operating System
-// Prof. Carlos A. Maziero, DINF UFPR
-// Versão 1.1 -- Julho de 2016
+// Codigo desenvolvido para a disciplina de Sistemas Operacionais por:
+// GRR20116644 - Guilherme Lopes do Nascimento
+// GRR20136059 - Matheus Rotondano de Camargo
 
 // Estruturas de dados internas do sistema operacional
 
