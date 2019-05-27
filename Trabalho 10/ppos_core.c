@@ -19,7 +19,7 @@ int lock[255];
 
 unsigned int global_time=0;
 
-task_t *tcb, *ready, *suspended, *sleeping, *current_task;
+task_t *tcb, *ready_q, *suspended_q, *sleeping_q, *current_task;
 task_t main_task, dispatcher;
 
 struct sigaction action;
@@ -109,13 +109,13 @@ int task_getprio (task_t *task) {
 }
 
 task_t *scheduler () {
-  task_t *next = ready;
+  task_t *next = ready_q;
 
-  if (!ready) {
+  if (!ready_q) {
     return NULL;
   }
 
-  for (task_t *node = ready->next; node != ready; node = node->next) {
+  for (task_t *node = ready_q->next; node != ready_q; node = node->next) {
     if (init == 0) 
       node->dynamic_prio = node->static_prio;
     if (node->dynamic_prio < next->dynamic_prio) {
@@ -135,40 +135,49 @@ task_t *scheduler () {
 void dispatcher_body () {
   task_t *next;
 
-  while ( userTasks > 0 ) {    
+  while ( userTasks > 0 ) { 
+    // printf("%d ", userTasks);   
     next = scheduler();
     if (next) {
       next->quantum = QUANTUM;
-      queue_remove((queue_t**) &ready, (queue_t*) next);
+      next->status = running;
+      // printf("VOU PARA A TASK %d\n", next->id);
+      // queue_print("Ready list", (queue_t*)ready_q, &print_elem);
+      // queue_print("Suspended list", (queue_t*)suspended_q, &print_elem);
+      queue_remove((queue_t**) &ready_q, (queue_t*) next);
       task_switch (next);
     }
 
-    if (sleeping) {
+    if (sleeping_q) {
       task_t *node, *aux;
 
-      for (node = sleeping; node->next != sleeping;) {
+      for (node = sleeping_q; node->next != sleeping_q;) {
         aux  = node;
         node = node->next;
-        if (systime() >= aux->wake_time) {        
-          queue_remove((queue_t**) &sleeping, (queue_t*) aux);
-          queue_append((queue_t**) &ready,    (queue_t*) aux);
+        if (systime() >= aux->wake_time) {
+          aux->status = ready;        
+          queue_remove((queue_t**) &sleeping_q, (queue_t*) aux);
+          queue_append((queue_t**) &ready_q,    (queue_t*) aux);
         }
       }
       aux  = node;
       node = node->next;
-      if (systime() >= aux->wake_time) {      
-        queue_remove((queue_t**) &sleeping, (queue_t*) aux);
-        queue_append((queue_t**) &ready,    (queue_t*) aux);
+      if (systime() >= aux->wake_time) {  
+        aux->status = ready;    
+        queue_remove((queue_t**) &sleeping_q, (queue_t*) aux);
+        queue_append((queue_t**) &ready_q,    (queue_t*) aux);
       }
     }
   }
+  // puts("joia");
   task_exit(1);
 }
 
 // Devolve uma tarefa para o final da fila de prontas e 
 // devolve o processador para o dispatcher
 void task_yield () {
-  queue_append((queue_t**) &ready, (queue_t*) current_task);
+  current_task->status = ready;
+  queue_append((queue_t**) &ready_q, (queue_t*) current_task);
   task_switch(&dispatcher);
 }
 
@@ -201,6 +210,7 @@ void ppos_init () {
   main_task.activations = 0;
   main_task.waiting = NULL;
   main_task.quantum = QUANTUM;
+  // main_task.status = ready;
   getcontext(&main_task.context);
   char *main_stack = malloc (STACKSIZE) ;
   if (main_stack) {
@@ -213,10 +223,12 @@ void ppos_init () {
     perror ("Erro na criação da pilha: ") ;
     return ;
   }
-  queue_append((queue_t**) &ready, (queue_t*) &main_task);
+  // ++userTasks;
+  // queue_append((queue_t**) &ready, (queue_t*) &main_task);
 
   dispatcher.id = id_create();
   dispatcher.activations = 0;
+  dispatcher.status = ready;
   getcontext(&dispatcher.context);
   char *dispatcher_stack = malloc (STACKSIZE) ;
   if (dispatcher_stack) {
@@ -232,7 +244,9 @@ void ppos_init () {
   makecontext(&dispatcher.context, (void*)(*dispatcher_body), 0) ;
   queue_append((queue_t**) &tcb, (queue_t*) &dispatcher);
 
+  main_task.status = running;
   current_task = &main_task;
+  return;
 }
 
 int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
@@ -242,6 +256,7 @@ int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   task->start = global_time;
   task->activations = 0;
   task->waiting = NULL;
+  task->status = ready;
   getcontext (&task->context);
   char *stack = malloc (STACKSIZE) ;
   if (stack) {
@@ -256,7 +271,7 @@ int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   }
 
   makecontext(&task->context, (void*)(*start_routine), 1, arg) ;
-  queue_append((queue_t**) &ready, (queue_t*) task);
+  queue_append((queue_t**) &ready_q, (queue_t*) task);
   ++userTasks;
   return task->id;
 }
@@ -266,7 +281,11 @@ int task_switch (task_t *task) {
     return -1;
 
   task_t *old_task = current_task;
+
   current_task = task;
+  if (old_task->status == running)
+    old_task->status = ready;
+  current_task->status = running;
   current_task->activations++;
   // printf("Old task: %d // New task %d\n", old_task->id, current_task->id);
   // queue_print("Ready list", (queue_t*)ready, &print_elem);
@@ -275,33 +294,48 @@ int task_switch (task_t *task) {
 }
 
 void task_exit (int exitCode) {
-  task_t *node;
+  task_t *node, *aux;
 
   current_task->exit_code = exitCode;
+  current_task->status = terminated;
+  // queue_remove((queue_t**) &ready_q, (queue_t*) current_task);
   printf("Task %d exit: running time %u ms, cpu time %u ms, %u activations\n", 
             current_task->id, global_time - current_task->start, 
             current_task->cpu_time, current_task->activations);
 
   if (current_task != &dispatcher) {
-    if (suspended) {
+    if (suspended_q) {
       // find out which task is waiting for current task
-      for (node = suspended; node->next != suspended; node = node->next) {
-        if (node->waiting == current_task) {
-          node->waiting = NULL;
-          queue_remove((queue_t**) &suspended, (queue_t*) node);
-          queue_append((queue_t**) &ready, (queue_t*) node); 
+      for (node = suspended_q; node->next != suspended_q; ) {
+        aux  = node;
+        node = node->next;
+        if (aux->waiting == current_task) {
+          aux->waiting = NULL;
+          aux->status = ready;
+          queue_remove((queue_t**) &suspended_q, (queue_t*) aux);
+          queue_append((queue_t**) &ready_q, (queue_t*) aux); 
         }
       }
-      if (node->waiting == current_task) {
-        node->waiting = NULL;
-        queue_remove((queue_t**) &suspended, (queue_t*) node);
-        queue_append((queue_t**) &ready, (queue_t*) node);  
+      aux  = node;
+      if (aux->waiting == current_task) {
+        aux->waiting = NULL;
+        aux->status = ready;
+        queue_remove((queue_t**) &suspended_q, (queue_t*) aux);
+        queue_append((queue_t**) &ready_q, (queue_t*) aux);  
       }     
-    --userTasks;
-    task_switch(&dispatcher);
     }
+    // puts("depois do suspenso");
+    queue_print("Ready list", (queue_t*)ready_q, &print_elem);
+    queue_print("Suspended list", (queue_t*)suspended_q, &print_elem);
+    --userTasks;
+    printf("exit: task %d status: %d\n", current_task->id, current_task->status);
+    task_switch(&dispatcher);
   }
   else {
+    // puts("cabo");
+    queue_print("Ready list", (queue_t*)ready_q, &print_elem);
+    queue_print("Suspended list", (queue_t*)suspended_q, &print_elem);
+    printf("exit: task %d status: %d\n", current_task->id, current_task->status);
     task_switch(&main_task);
   }
 }
@@ -313,19 +347,29 @@ int task_id () {
 int task_join (task_t *task) {
   if (!task || task == current_task)
     return -1;
-  if (task->next == NULL && task->prev == NULL)
-    return -1;
+  if (task->status == terminated) {
+    // puts("eh isto");
+    // printf("status de %d: %d\n", task->id, task->status);
+    return task->exit_code;
+  }
+  // puts("comasim?");
+  // printf("status de %d: %d\n", task->id, task->status);
 
   current_task->waiting = task;
+  printf("%d\n", task->id);
+  current_task->status = suspended;
   // queue_remove((queue_t**) &ready, (queue_t*) current_task);
-  queue_append((queue_t**) &suspended, (queue_t*) current_task);
+  queue_append((queue_t**) &suspended_q, (queue_t*) current_task);
+  // queue_print("Ready list", (queue_t*)ready_q, &print_elem);
+  // queue_print("Suspended list", (queue_t*)suspended_q, &print_elem);
   task_switch(&dispatcher);
   return task->exit_code;
 }
 
 void task_sleep (int t) {
   current_task->wake_time =  t + systime();
-  queue_append((queue_t**) &sleeping, (queue_t*) current_task);
+  current_task->status = sleeping;
+  queue_append((queue_t**) &sleeping_q, (queue_t*) current_task);
 
   task_switch(&dispatcher);
 }
@@ -336,6 +380,7 @@ int sem_create (semaphore_t *s, int value) {
   if (!s)
     return -1;
 
+  s->status  = up;
   s->counter = value;
   s->blocked = NULL;
 
@@ -344,11 +389,10 @@ int sem_create (semaphore_t *s, int value) {
 
 // requisita o semáforo
 int sem_down (semaphore_t *s) {
-  if (!s)
+  if (!s || s->status == down)
     return -1;
 
-  --s->counter;
-  if (s->counter < 0) {
+  if (--s->counter < 0) {
     queue_append((queue_t**) &s->blocked, (queue_t*) current_task);
     task_yield();
   }
@@ -357,10 +401,28 @@ int sem_down (semaphore_t *s) {
 
 // libera o semáforo
 int sem_up (semaphore_t *s) {
+  if (!s || s->status == down) 
+    return -1;
 
+  ++s->counter;
+  if (s->blocked != NULL) {
+    queue_t *task = queue_remove((queue_t**) &s->blocked, (queue_t*) s->blocked);
+    queue_append((queue_t**) &ready_q, (queue_t*) task);
+  }
+  return 0;
 }
 
 // destroi o semáforo, liberando as tarefas bloqueadas
 int sem_destroy (semaphore_t *s) {
-
+  if (!s)
+    return -1;
+  
+  s->status = down;
+  if (s->blocked != NULL) {
+    for (int i = s->counter; i < 0; ++i) {
+      queue_t *task = queue_remove((queue_t**) &s->blocked, (queue_t*) s->blocked);
+      queue_append((queue_t**) &ready_q, (queue_t*) task);
+    }
+  }
+  return 0;
 }

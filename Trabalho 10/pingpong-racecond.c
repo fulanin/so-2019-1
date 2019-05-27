@@ -9,7 +9,7 @@
 #include "ppos.h"
 
 #define NUMTASKS 30
-#define NUMSTEPS 10000000
+#define NUMSTEPS 1000000
 
 task_t task[NUMTASKS] ;
 semaphore_t  s ;
@@ -46,8 +46,10 @@ int main (int argc, char *argv[])
    for (i=0; i<NUMTASKS; i++)
      task_create (&task[i], taskBody, "Task") ;
 
-   for (i=0; i<NUMTASKS; i++)
+   for (i=0; i<NUMTASKS; i++) {
      task_join (&task[i]) ;
+     printf("%d\n", i);
+   }
 
    sem_destroy (&s) ;
 
