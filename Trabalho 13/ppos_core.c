@@ -55,8 +55,10 @@ int id_create () {
 void handler (int signum) {
   ++global_time;
   ++current_task->cpu_time;
-  if (--current_task->quantum <= 0) {
-    task_yield();
+  if (current_task->type != kernel) {
+    if (--current_task->quantum <= 0) {
+      task_yield();
+    }
   }
 }
 
@@ -211,6 +213,7 @@ void ppos_init () {
   main_task.activations = 0;
   main_task.waiting = NULL;
   main_task.quantum = QUANTUM;
+  main_task.type = user;
   // main_task.status = ready;
   getcontext(&main_task.context);
   char *main_stack = malloc (STACKSIZE) ;
@@ -232,6 +235,7 @@ void ppos_init () {
   dispatcher.id = id_create();
   dispatcher.activations = 0;
   dispatcher.status = ready;
+  dispatcher.type = kernel;
   getcontext(&dispatcher.context);
   char *dispatcher_stack = malloc (STACKSIZE) ;
   if (dispatcher_stack) {
@@ -258,6 +262,7 @@ int task_create (task_t *task, void (*start_routine)(void *),  void *arg) {
   task->activations = 0;
   task->waiting = NULL;
   task->status = ready;
+  task->type = kernel;
   getcontext (&task->context);
   char *stack = malloc (STACKSIZE) ;
   if (stack) {

@@ -17,6 +17,7 @@ enum disk_status {idle, busy};
 typedef struct {
   semaphore_t mutex;
   enum disk_status status;
+  // task_t disk_dispatcher;
   // struct sigaction handler;
   int signal;
 } disk_t ;

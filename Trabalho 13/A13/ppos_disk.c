@@ -132,7 +132,7 @@ int disk_mgr_init(int *numBlocks, int *blockSize)
   disk_dispatcher.static_priority = -20;
   --user_tasks;
   queue_remove(&ready_queue, (queue_t*)&disk_dispatcher);
-  queue_append(&suspended_queue, (queue_t*)&disk_dispatcher);
+  // queue_append(&suspended_queue, (queue_t*)&disk_dispatcher);
 
   disk_handler.sa_handler = job_handler;
   sigemptyset(&disk_handler.sa_mask);

@@ -83,6 +83,7 @@ int disk_mgr_init (int *numBlocks, int *blockSize) {
 
   task_create(&disk_dispatcher, (void*)disk_dispatcher_body, NULL);
   task_setprio(&disk_dispatcher, -20);
+  disk_dispatcher.type = kernel;
   // printf("Disk Dispatcher ID: %d\n", disk_dispatcher.id);
   --userTasks;
   queue_remove((queue_t**) &ready_q,     (queue_t*) &disk_dispatcher);
@@ -95,6 +96,8 @@ int disk_mgr_init (int *numBlocks, int *blockSize) {
     perror("Erro em sigaction: ");
     exit(1);
   }
+
+  current_task->type = user;
 
   return 0;  
 }
@@ -109,24 +112,27 @@ int disk_block_read (int block, void *buffer) {
   request_t *read_request = malloc(sizeof(request_t));
   if (read_request) {
     sem_down(&disk.mutex);
+
+    current_task->type = kernel;
     read_request->prev = NULL;
     read_request->next = NULL;
     read_request->signal_type = DISK_CMD_READ;
     read_request->block = block;
     read_request->buffer = buffer;
-    puts("Criou o Request");
+    // puts("Criou o Request");
     queue_append((queue_t**)&request_q,      (queue_t*)read_request);
     queue_remove((queue_t**)&ready_q,        (queue_t*)current_task);
     queue_append((queue_t**)&waiting_disk_q, (queue_t*)current_task);
-    printf("Colocou %d na fila de espera de disco.\n", current_task->id);
+    // printf("Colocou %d na fila de espera de disco.\n", current_task->id);
 
     if (sleeping_scheduler) {
-      puts("Entra no if");
+      // puts("Entra no if");
       sleeping_scheduler = 0;
       queue_remove((queue_t**)&suspended_q, (queue_t*)&disk_dispatcher);
       queue_append((queue_t**)&ready_q,     (queue_t*)&disk_dispatcher);
-      printf("Colocou %d na fila de prontos\n", disk_dispatcher.id);
+      // printf("Colocou %d na fila de prontos\n", disk_dispatcher.id);
     }
+    current_task->type = user;
 
     sem_up(&disk.mutex);
     task_yield();
@@ -147,6 +153,8 @@ int disk_block_write (int block, void *buffer) {
   request_t *write_request = malloc(sizeof(request_t));
   if (write_request) {
     sem_down(&disk.mutex);
+
+    current_task->type = kernel;
     write_request->prev = NULL;
     write_request->next = NULL;
     write_request->signal_type = DISK_CMD_WRITE;
@@ -163,8 +171,9 @@ int disk_block_write (int block, void *buffer) {
       sleeping_scheduler = 0;
       queue_remove((queue_t**)&suspended_q, (queue_t*)&disk_dispatcher);
       queue_append((queue_t**)&ready_q,     (queue_t*)&disk_dispatcher);
-      printf("Colocou %d na fila de prontos\n", disk_dispatcher.id);
+      // printf("Colocou %d na fila de prontos\n", disk_dispatcher.id);
     }
+    current_task->type = user;
 
     sem_up(&disk.mutex);
     task_yield();
