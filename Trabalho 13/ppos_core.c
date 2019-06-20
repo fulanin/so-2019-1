@@ -116,7 +116,7 @@ task_t *scheduler () {
   task_t *next = ready_q;
 
   if (!ready_q) {
-    puts("vazio");
+    // puts("vazio");
     return NULL;
   }
 
@@ -145,14 +145,14 @@ void dispatcher_body () {
 
   puts("entrei no dispatcher");
   while ( userTasks > 0 ) { 
-    puts("Vou pegar o next");
+    // puts("Vou pegar o next");
     next = scheduler();
-    printf("passei\n");
+    // printf("passei\n");
     if (next) {
       next->quantum = QUANTUM;
       next->status = ready;
       queue_append((queue_t**) &ready_q, (queue_t*) next); 
-      printf("Vou pra task %d\n", next->id);    
+      // printf("Vou pra task %d\n", next->id);    
       task_switch (next);     
       if (next->status == terminated) {
         queue_remove((queue_t**) &ready_q, (queue_t*) next);
@@ -186,6 +186,8 @@ void dispatcher_body () {
 void task_yield () {
   // current_task->status = ready;
   // queue_append((queue_t**) &ready_q, (queue_t*) current_task);
+  puts("Entrei no yield, vou pro dispatcher");
+  printf("Endereco do dispatcher: %x\n", &dispatcher);
   task_switch(&dispatcher);
 }
 
@@ -240,7 +242,6 @@ void ppos_init () {
   dispatcher.id = id_create();
   dispatcher.activations = 0;
   dispatcher.status = ready;
-  dispatcher.type = kernel;
   getcontext(&dispatcher.context);
   char *dispatcher_stack = malloc (STACKSIZE) ;
   if (dispatcher_stack) {
@@ -253,8 +254,9 @@ void ppos_init () {
     perror ("Erro na criação da pilha: ") ;
     return ;
   }
-  makecontext(&dispatcher.context, (void*)(*dispatcher_body), 0) ;
-  queue_append((queue_t**) &tcb, (queue_t*) &dispatcher);
+  makecontext(&dispatcher.context, (void*)(*dispatcher_body), 0);
+  dispatcher.type = kernel;
+  // queue_append((queue_t**) &tcb, (queue_t*) &dispatcher);
 
   return;
 }
@@ -291,6 +293,7 @@ int task_switch (task_t *task) {
   if (!task) 
     return -1;
 
+  puts("entrei no task switch");
   task_t *old_task = current_task;
   current_task = task;
 
