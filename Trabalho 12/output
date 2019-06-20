@@ -1,0 +1,107 @@
+main: inicio
+T5 enviou 383
+T6 enviou 777
+T7 enviou 793
+               T2: recebeu 383
+               T2: recebeu 777
+               T2: recebeu 793
+               T2: 383+777+793 = 1953.000000 (raiz 44.192760)
+                                 T3 consumiu 44.192760
+T5 enviou 649
+T5 enviou 362
+T6 enviou 690
+T5 enviou 763
+T7 enviou 540
+               T2: recebeu 649
+               T2: recebeu 362
+               T2: recebeu 690
+               T2: 649+362+690 = 1701.000000 (raiz 41.243181)
+                                 T4 consumiu 41.243181
+               T2: recebeu 763
+               T2: recebeu 540
+               T2: recebeu 649
+               T2: 763+540+649 = 1952.000000 (raiz 44.181444)
+                                 T3 consumiu 44.181444
+T7 enviou 567
+T7 enviou 782
+T7 enviou 862
+               T2: recebeu 782
+               T2: recebeu 862
+               T2: recebeu 763
+               T2: 782+862+763 = 2407.000000 (raiz 49.061186)
+                                 T3 consumiu 49.061186
+               T2: recebeu 540
+               T2: recebeu 567
+               T2: recebeu 782
+               T2: 540+567+782 = 1889.000000 (raiz 43.462628)
+                                 T4 consumiu 43.462628
+T6 enviou 22
+               T2: recebeu 862
+               T2: recebeu 22
+               T2: recebeu 540
+               T2: 862+22+540 = 1424.000000 (raiz 37.735925)
+T7 enviou 167
+                                 T3 consumiu 37.735925
+T5 enviou 11
+T6 enviou 229
+T7 enviou 421
+T5 enviou 784
+                                 T3 consumiu 41.243181
+                                 T4 consumiu 44.181444
+               T2: recebeu 11
+               T2: recebeu 229
+               T2: recebeu 421
+               T2: 11+229+421 = 661.000000 (raiz 25.709920)
+T5 enviou 370
+T7 enviou 526
+T7 enviou 980
+T5 enviou 873
+T6 enviou 170
+                                 T3 consumiu 49.061186
+                                 T4 consumiu 43.462628
+               T2: recebeu 170
+               T2: recebeu 370
+               T2: recebeu 526
+               T2: 170+370+526 = 1066.000000 (raiz 32.649655)
+T7 enviou 84
+T7 enviou 336
+T5 enviou 846
+                                 T4 consumiu 37.735925
+T6 enviou 857
+                                 T4 consumiu 25.709920
+                                 T3 consumiu 32.649655
+T5 enviou 545
+T7 enviou 367
+                                 T3 consumiu 49.061186
+T7 enviou 43
+               T2: recebeu 846
+               T2: recebeu 857
+               T2: recebeu 545
+               T2: 846+857+545 = 2248.000000 (raiz 47.413078)
+T6 enviou 808
+T5 enviou 178
+                                 T3 consumiu 43.462628
+T6 enviou 403
+               T2: recebeu 367
+               T2: recebeu 43
+               T2: recebeu 808
+               T2: 367+43+808 = 1218.000000 (raiz 34.899857)
+T5 enviou 399
+                                 T4 consumiu 37.735925
+                                 T4 consumiu 25.709920
+T7 enviou 368
+                                 T3 consumiu 32.649655
+Task 2 exit: running time 14915 ms, cpu time 0 ms, 12 activations
+main: destroi queueValores
+main: destroi queueRaizes
+main: fim
+Task 0 exit: running time 14915 ms, cpu time 0 ms, 1 activations
+T7 terminou
+Task 7 exit: running time 14957 ms, cpu time 0 ms, 15 activations
+                                 T4 terminou
+Task 4 exit: running time 15211 ms, cpu time 0 ms, 11 activations
+T5 terminou
+Task 5 exit: running time 15377 ms, cpu time 0 ms, 13 activations
+                                 T3 terminou
+Task 3 exit: running time 15381 ms, cpu time 0 ms, 14 activations
+Task 1 exit: running time 15381 ms, cpu time 15381 ms, 15456 activations

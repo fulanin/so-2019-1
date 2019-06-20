@@ -1,0 +1,163 @@
+main: inicio
+Disco contem 256 blocos de 64 bytes cada
+Ready list : [<4><5><6><7><8><9><10><11><12><13><14><15><16><17><18>]
+T03 will move  8 blocks between block   0 and block 255
+T03 will read block   0
+Ready list : [<5><6><7><8><9><10><11><12><13><14><15><16><17><18><2>]
+T04 will move  8 blocks between block   8 and block 247
+T04 will read block   8
+Ready list : [<6><7><8><9><10><11><12><13><14><15><16><17><18><2>]
+T05 will move  8 blocks between block  16 and block 239
+T05 will read block  16
+Ready list : [<7><8><9><10><11><12><13><14><15><16><17><18><2>]
+T06 will move  8 blocks between block  24 and block 231
+T06 will read block  24
+Ready list : [<8><9><10><11><12><13><14><15><16><17><18><2>]
+T07 will move  8 blocks between block  32 and block 223
+T07 will read block  32
+Ready list : [<9><10><11><12><13><14><15><16><17><18><2>]
+T08 will move  8 blocks between block  40 and block 215
+T08 will read block  40
+Ready list : [<10><11><12><13><14><15><16><17><18><2>]
+T09 will move  8 blocks between block  48 and block 207
+T09 will read block  48
+Ready list : [<11><12><13><14><15><16><17><18><2>]
+T10 will move  8 blocks between block  56 and block 199
+T10 will read block  56
+Ready list : [<12><13><14><15><16><17><18><2>]
+T11 will move  8 blocks between block  64 and block 191
+T11 will read block  64
+Ready list : [<13><14><15><16><17><18><2>]
+T12 will move  8 blocks between block  72 and block 183
+T12 will read block  72
+Ready list : [<14><15><16><17><18><2>]
+T13 will move  8 blocks between block  80 and block 175
+T13 will read block  80
+Ready list : [<15><16><17><18><2>]
+T14 will move  8 blocks between block  88 and block 167
+T14 will read block  88
+Ready list : [<16><17><18><2>]
+T15 will move  8 blocks between block  96 and block 159
+T15 will read block  96
+Ready list : [<17><18><2>]
+T16 will move  8 blocks between block 104 and block 151
+T16 will read block 104
+Ready list : [<18><2>]
+T17 will move  8 blocks between block 112 and block 143
+T17 will read block 112
+Ready list : [<2>]
+T18 will move  8 blocks between block 120 and block 135
+T18 will read block 120
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T03 read  block   0
+T03 will read block 255
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T04 read  block   8
+T04 will read block 247
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T05 read  block  16
+T05 will read block 239
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T06 read  block  24
+T06 will read block 231
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T07 read  block  32
+T07 will read block 223
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T08 read  block  40
+T08 will read block 215
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T09 read  block  48
+T09 will read block 207
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T10 read  block  56
+T10 will read block 199
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T11 read  block  64
+T11 will read block 191
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T12 read  block  72
+T12 will read block 183
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T13 read  block  80
+T13 will read block 175
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T14 read  block  88
+T14 will read block 167
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T15 read  block  96
+T15 will read block 159
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T16 read  block 104
+T16 will read block 151
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T17 read  block 112
+T17 will read block 143
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T18 read  block 120
+T18 will read block 135
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T03 read  block 255
+T03 block   0 has: [<--bloco 0000------------------------------------------------->
+]
+T03 block 255 has: [<--bloco 0255------------------------------------------------->
+]
+T03 will write block 255
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T04 read  block 247
+T04 block   8 has: [<--bloco 0008------------------------------------------------->
+]
+T04 block 247 has: [<--bloco 0247------------------------------------------------->
+]
+T04 will write block 247
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T05 read  block 239
+T05 block  16 has: [<--bloco 0016------------------------------------------------->
+]
+T05 block 239 has: [<--bloco 0239------------------------------------------------->
+]
+T05 will write block 239
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T06 read  block 231
+T06 block  24 has: [<--bloco 0024------------------------------------------------->
+]
+T06 block 231 has: [<--bloco 0231------------------------------------------------->
+]
+T06 will write block 231
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T07 read  block 223
+T07 block  32 has: [<--bloco 0223------------------------------------------------->
+]
+T07 block 223 has: [<--bloco 0223------------------------------------------------->
+]
+T07 will write block 223
+ERRO print: queue é um ponteiro vazio
+ERRO print: queue é um ponteiro vazio
+T08 read  block 215
+T08 block  40 has: [<--bloco 0215------------------------------------------------->
+]
+T08 block 215 has: [<--bloco 0215------------------------------------------------->
+]
+T08 will write block 215
+ERRO print: queue é um ponteiro vazio
