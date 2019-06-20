@@ -36,7 +36,7 @@ void disk_dispatcher_body(void)
     sem_down(&disk.mutex);
 
     if (disk.signal) {
-      puts("SINAL KARAI");
+      // puts("SINAL KARAI");
       disk.signal = 0;
       task_t *task = (task_t*)queue_remove((queue_t**)&waiting_disk_q, (queue_t*)waiting_disk_q);
       queue_append((queue_t**)&ready_q, (queue_t*)task);
@@ -49,18 +49,18 @@ void disk_dispatcher_body(void)
 
 
     if ((disk.status == idle) && (request_q != NULL)) {
-      puts("Idle com requests");
+      // puts("Idle com requests");
       request_t *next = (request_t*)queue_remove((queue_t**)&request_q, (queue_t*)request_q);
-      printf("Tirei da fila o sinal %d e o bloco %d\n", next->signal_type, next->block);
+      // printf("Tirei da fila o sinal %d e o bloco %d\n", next->signal_type, next->block);
       disk_cmd(next->signal_type, next->block, next->buffer);
-      puts("Passei do disk_cmd");
+      // puts("Passei do disk_cmd");
       disk.status = busy;
       free(next);
-      puts("Passei do free");
+      // puts("Passei do free");
     }
   
     sem_up(&disk.mutex);
-    puts("Vou pro yield");
+    // puts("Vou pro yield");
     task_yield();    
   }
 }

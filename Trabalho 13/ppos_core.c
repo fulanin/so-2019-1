@@ -141,12 +141,10 @@ task_t *scheduler () {
 // ----------
 // Dispatcher
 void dispatcher_body () {
-  task_t *next;
-
-  puts("entrei no dispatcher");
+  // puts("entrei no dispatcher");
   while ( userTasks > 0 ) { 
     // puts("Vou pegar o next");
-    next = scheduler();
+    task_t *next = scheduler();
     // printf("passei\n");
     if (next) {
       next->quantum = QUANTUM;
@@ -186,8 +184,8 @@ void dispatcher_body () {
 void task_yield () {
   // current_task->status = ready;
   // queue_append((queue_t**) &ready_q, (queue_t*) current_task);
-  puts("Entrei no yield, vou pro dispatcher");
-  printf("Endereco do dispatcher: %x\n", &dispatcher);
+  // puts("Entrei no yield, vou pro dispatcher");
+  // printf("Endereco do dispatcher: %x\n", &dispatcher);
   task_switch(&dispatcher);
 }
 
@@ -293,7 +291,7 @@ int task_switch (task_t *task) {
   if (!task) 
     return -1;
 
-  puts("entrei no task switch");
+  // puts("entrei no task switch");
   task_t *old_task = current_task;
   current_task = task;
 
@@ -303,7 +301,7 @@ int task_switch (task_t *task) {
   current_task->activations++;
   // printf("Old task: %d // New task %d\n", old_task->id, current_task->id);
   // queue_print("Ready list", (queue_t*)ready, &print_elem);
-  swapcontext(&old_task->context, &current_task->context);
+  swapcontext(&old_task->context, &task->context);
   return 0;
 }
 
