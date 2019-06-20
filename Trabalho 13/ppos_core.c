@@ -116,6 +116,7 @@ task_t *scheduler () {
   task_t *next = ready_q;
 
   if (!ready_q) {
+    puts("vazio");
     return NULL;
   }
 
@@ -142,13 +143,17 @@ task_t *scheduler () {
 void dispatcher_body () {
   task_t *next;
 
-  while ( userTasks > 0 ) {  
+  puts("entrei no dispatcher");
+  while ( userTasks > 0 ) { 
+    puts("Vou pegar o next");
     next = scheduler();
+    printf("passei\n");
     if (next) {
       next->quantum = QUANTUM;
       next->status = ready;
-      queue_append((queue_t**) &ready_q, (queue_t*) next);      
-      task_switch (next);
+      queue_append((queue_t**) &ready_q, (queue_t*) next); 
+      printf("Vou pra task %d\n", next->id);    
+      task_switch (next);     
       if (next->status == terminated) {
         queue_remove((queue_t**) &ready_q, (queue_t*) next);
         --userTasks;

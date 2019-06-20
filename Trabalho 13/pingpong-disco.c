@@ -74,9 +74,9 @@ void moverBody (void * arg)
     // escreve o bloco b2 no disco
     printf ("T%02d will write block DOS %3d\n", task_id(), block_orig) ;
     if (disk_block_write (block_orig, buffer2) == 0)
-      printf ("T%02d wrote block %3d\n", task_id(), block_orig) ;
+      printf ("T%02d wrote block DOS %3d\n", task_id(), block_orig) ;
     else
-      printf ("T%02d error writing block DOS %3d\n", task_id(), block_orig) ;
+      printf ("T%02d error writing block %3d\n", task_id(), block_orig) ;
 
     // define os proximos blocos
     block_orig++ ;
