@@ -1,0 +1,36 @@
+main: inicio
+Disco contem 256 blocos de 64 bytes cada
+T03 will move  8 blocks between block   0 and block 255
+T03 will read block   0
+T04 will move  8 blocks between block   8 and block 247
+T04 will read block   8
+T05 will move  8 blocks between block  16 and block 239
+T05 will read block  16
+T06 will move  8 blocks between block  24 and block 231
+T06 will read block  24
+T07 will move  8 blocks between block  32 and block 223
+T07 will read block  32
+T08 will move  8 blocks between block  40 and block 215
+T08 will read block  40
+T09 will move  8 blocks between block  48 and block 207
+T09 will read block  48
+T10 will move  8 blocks between block  56 and block 199
+T10 will read block  56
+T11 will move  8 blocks between block  64 and block 191
+T11 will read block  64
+T12 will move  8 blocks between block  72 and block 183
+T12 will read block  72
+T13 will move  8 blocks between block  80 and block 175
+T13 will read block  80
+T14 will move  8 blocks between block  88 and block 167
+T14 will read block  88
+T15 will move  8 blocks between block  96 and block 159
+T15 will read block  96
+T16 will move  8 blocks between block 104 and block 151
+T16 will read block 104
+T17 will move  8 blocks between block 112 and block 143
+T17 will read block 112
+T18 will move  8 blocks between block 120 and block 135
+T18 will read block 120
+T03 read  block   0
+T03 will read block 255

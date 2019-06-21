@@ -16,28 +16,29 @@
 
 extern int userTasks;
 extern queue_t *ready_q, *suspended_q;
-queue_t *request_q, *waiting_disk_q;
 extern task_t *current_task;
+
+queue_t *request_q, *waiting_disk_q;
 task_t disk_dispatcher;
-disk_t disk;
+semaphore_t disk_mutex;
 struct sigaction disk_handler;
-int sleeping_scheduler;
+int disk_busy, disk_signal, sleeping_scheduler;
 
 void signal_handler (int signal) {
   // puts("SINAL PORA");
-  disk.signal = 1;
-  disk.status = idle;
+  disk_signal = 1;
+  disk_busy = 0;
   task_switch(&disk_dispatcher);
 }
 
 void disk_dispatcher_body(void)
 {
   while (TRUE) {
-    sem_down(&disk.mutex);
+    sem_down(&disk_mutex);
 
-    if (disk.signal) {
+    if (disk_signal) {
       // puts("SINAL KARAI");
-      disk.signal = 0;
+      disk_signal = 0;
       task_t *task = (task_t*)queue_remove((queue_t**)&waiting_disk_q, (queue_t*)waiting_disk_q);
       queue_append((queue_t**)&ready_q, (queue_t*)task);
     }
@@ -48,18 +49,18 @@ void disk_dispatcher_body(void)
     }
 
 
-    if ((disk.status == idle) && (request_q != NULL)) {
+    if ((disk_busy == 0) && (request_q != NULL)) {
       // puts("Idle com requests");
       request_t *next = (request_t*)queue_remove((queue_t**)&request_q, (queue_t*)request_q);
       // printf("Tirei da fila o sinal %d e o bloco %d\n", next->signal_type, next->block);
       disk_cmd(next->signal_type, next->block, next->buffer);
       // puts("Passei do disk_cmd");
-      disk.status = busy;
+      disk_busy = 1;
       free(next);
       // puts("Passei do free");
     }
   
-    sem_up(&disk.mutex);
+    sem_up(&disk_mutex);
     // puts("Vou pro yield");
     task_yield();    
   }
@@ -73,19 +74,26 @@ int disk_mgr_init (int *numBlocks, int *blockSize) {
   if (!numBlocks || !blockSize)
     return -1;
 
-  if (disk_cmd(DISK_CMD_INIT, 0, NULL) == -1)
+  current_task->type = kernel;
+
+  if (disk_cmd(DISK_CMD_INIT, 0, NULL) == -1) {
+    current_task->type = user;
     return -1;
+  }
 
   *numBlocks = disk_cmd(DISK_CMD_DISKSIZE, 0, NULL);
   *blockSize = disk_cmd(DISK_CMD_BLOCKSIZE, 0, NULL);
-  if (*numBlocks == -1 || *blockSize == -1)
+  if (*numBlocks == -1 || *blockSize == -1) {
+    current_task->type = user;
     return -1;
+  }
+
   request_q = NULL;
   waiting_disk_q = NULL;
   sleeping_scheduler = 1;
-  sem_create(&disk.mutex, 1);
-  disk.signal = 0;
-  disk.status = idle;
+  sem_create(&disk_mutex, 1);
+  disk_signal = 0;
+  disk_busy   = 0;
 
   task_create(&disk_dispatcher, (void*)disk_dispatcher_body, NULL);
   task_setprio(&disk_dispatcher, -20);
@@ -117,7 +125,7 @@ int disk_block_read (int block, void *buffer) {
 
   request_t *read_request = malloc(sizeof(request_t));
   if (read_request) {
-    sem_down(&disk.mutex);
+    sem_down(&disk_mutex);
 
     current_task->type = kernel;
     read_request->prev = NULL;
@@ -140,8 +148,8 @@ int disk_block_read (int block, void *buffer) {
     }
     current_task->type = user;
 
-    sem_up(&disk.mutex);
-    puts("Vai pro yield");
+    sem_up(&disk_mutex);
+    // puts("Vai pro yield");
     task_yield();
   }
   else
@@ -159,7 +167,7 @@ int disk_block_write (int block, void *buffer) {
 
   request_t *write_request = malloc(sizeof(request_t));
   if (write_request) {
-    sem_down(&disk.mutex);
+    sem_down(&disk_mutex);
 
     current_task->type = kernel;
     write_request->prev = NULL;
@@ -182,8 +190,8 @@ int disk_block_write (int block, void *buffer) {
     }
     current_task->type = user;
 
-    sem_up(&disk.mutex);
-    puts("Vai pro yield");
+    sem_up(&disk_mutex);
+    // puts("Vai pro yield");
     task_yield();
   }
   else
